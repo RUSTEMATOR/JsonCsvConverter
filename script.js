@@ -124,7 +124,13 @@ async function handleFileUpload(event, conversionType) {
             link.href = url;
             link.download = outputFileName;
             link.click();
-        }
+        } else if (conversionType === 'jsonToCsv') {
+                // JSON to CSV conversion
+                const jsonData = JSON.parse(fileContent);
+                outputData = jsonToCsv(jsonData);
+                outputFileName = `${file.name.split('.')[0]}_converted.csv`;
+                mimeType = 'text/csv;charset=utf-8;';
+            }
     };
 
     reader.readAsText(file);
