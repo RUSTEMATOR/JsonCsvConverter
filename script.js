@@ -76,7 +76,8 @@ async function csvToJson(csv) {
     }, {});
 
     // Unflatten the CSV data into a nested structure
-    return await unflattenJson(flatData);
+    const result = await unflattenJson(flatData);
+    return result;
 }
 
 // Process File Upload
@@ -94,13 +95,12 @@ async function handleFileUpload(event, conversionType) {
             result = jsonToCsv(jsonData);
             outputFileName = `${file.name.split('.')[0]}_converted.csv`;
         } else if (conversionType === 'csvToJson') {
-            // Await the promise to get the resolved value
             result = await csvToJson(fileContent);
             outputFileName = `${file.name.split('.')[0]}_converted.json`;
         }
 
         // Download the result
-        const blob = new Blob([result], { type: 'text/plain' });
+        const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -110,4 +110,3 @@ async function handleFileUpload(event, conversionType) {
 
     reader.readAsText(file);
 }
-
