@@ -53,29 +53,54 @@ function jsonToCsv(json) {
     return csvContent;
 }
 
-async function csvToJson(csv) {
-    const rows = csv.split('\n').map(row => row.split(','));
-
-    // Ensure there is data in the rows
-    if (rows.length <= 1) return {}; // If no data exists, return an empty object
-
-    const headers = rows[0]; // First row contains headers
-    const flatData = rows.slice(1).reduce((acc, row) => {
-        const obj = {};
-        row.forEach((value, index) => {
-            obj[headers[index]] = value;
-        });
-        const key = obj['Key']; // Get the key from 'Key' column
-        const value = obj['Value']; // Get the value from 'Value' column
-
-        if (key && value) {
-            acc[key] = value; // Flatten the data as key-value pairs
+function csvToJson(csv) {
+    // Helper function to parse CSV rows with quoted values
+    const parseCsvRow = (row) => {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < row.length; i++) {
+            const char = row[i];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
         }
-        return acc;
-    }, {});
+        result.push(current.trim());
+        return result;
+    };
 
-    // Unflatten the CSV data into a nested structure
-    const result = await unflattenJson(flatData);
+    // Split CSV into lines and process
+    const lines = csv.split('\n').filter(line => line.trim() !== '');
+    if (lines.length < 2) return {}; // No data
+
+    const headers = parseCsvRow(lines[0]);
+    const result = {};
+
+    for (let i = 1; i < lines.length; i++) {
+        const currentLine = parseCsvRow(lines[i]);
+        if (currentLine.length !== headers.length) continue;
+
+        const key = currentLine[0];
+        const value = currentLine[1].replace(/^"(.*)"$/, '$1'); // Remove surrounding quotes
+        const keys = key.split('.');
+        
+        // Build nested structure
+        keys.reduce((acc, currentKey, index) => {
+            if (index === keys.length - 1) {
+                acc[currentKey] = value;
+            } else {
+                acc[currentKey] = acc[currentKey] || {};
+            }
+            return acc[currentKey];
+        }, result);
+    }
+
     return result;
 }
 
@@ -85,25 +110,21 @@ async function handleFileUpload(event, conversionType) {
 
     reader.onload = async function (e) {
         const fileContent = e.target.result;
-
-        let result;
-        let outputFileName;
-        if (conversionType === 'jsonToCsv') {
-            const jsonData = JSON.parse(fileContent);
-            result = jsonToCsv(jsonData);
-            outputFileName = `${file.name.split('.')[0]}_converted.csv`;
-        } else if (conversionType === 'csvToJson') {
-            result = await csvToJson(fileContent);
-            outputFileName = `${file.name.split('.')[0]}_converted.json`;
+        
+        if (conversionType === 'csvToJson') {
+            const jsonData = csvToJson(fileContent);
+            const outputFileName = `${file.name.split('.')[0]}_converted.json`;
+            
+            // Create and download JSON file
+            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
+                type: 'application/json' 
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = outputFileName;
+            link.click();
         }
-
-        // Download the result
-        const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = outputFileName;
-        link.click();
     };
 
     reader.readAsText(file);
