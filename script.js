@@ -80,11 +80,11 @@ async function csvToJson(csv) {
 }
 
 // Process File Upload
-function handleFileUpload(event, conversionType) {
+async function handleFileUpload(event, conversionType) {
     const file = event.target.files[0];
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
         const fileContent = e.target.result;
 
         let result;
@@ -94,7 +94,8 @@ function handleFileUpload(event, conversionType) {
             result = jsonToCsv(jsonData);
             outputFileName = `${file.name.split('.')[0]}_converted.csv`;
         } else if (conversionType === 'csvToJson') {
-            result = csvToJson(fileContent);
+            // Await the promise to get the resolved value
+            result = await csvToJson(fileContent);
             outputFileName = `${file.name.split('.')[0]}_converted.json`;
         }
 
