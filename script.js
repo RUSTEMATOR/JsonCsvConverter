@@ -110,42 +110,38 @@ async function handleFileUpload(event, conversionType) {
 
     reader.onload = async function (e) {
         const fileContent = e.target.result;
-        let outputData;
-        let outputFileName;
-        let mimeType;
 
         try {
-             if (conversionType === 'csvToJson') {
-            const jsonData = csvToJson(fileContent);
-            const outputFileName = `${file.name.split('.')[0]}_converted.json`;
-            
-            // Create and download JSON file
-            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
-                type: 'application/json' 
-            });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = outputFileName;
-            link.click();
-        } else if (conversionType === 'jsonToCsv') {
+            let outputData;
+            let outputFileName;
+            let mimeType;
+
+            if (conversionType === 'csvToJson') {
+                // CSV to JSON conversion
+                outputData = await csvToJson(fileContent); // Await if csvToJson is async
+                outputFileName = `${file.name.split('.')[0]}_converted.json`;
+                mimeType = 'application/json';
+                outputData = JSON.stringify(outputData, null, 2); // Format JSON for readability
+            } else if (conversionType === 'jsonToCsv') {
                 // JSON to CSV conversion
                 const jsonData = JSON.parse(fileContent);
                 outputData = jsonToCsv(jsonData);
                 outputFileName = `${file.name.split('.')[0]}_converted.csv`;
                 mimeType = 'text/csv;charset=utf-8;';
-                             // Create and download file
+            } else {
+                throw new Error('Invalid conversion type');
+            }
+
+            // Create and download file
             const blob = new Blob([outputData], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = outputFileName;
             link.click();
+
+            // Clean up memory
             URL.revokeObjectURL(url);
-            }
-
-
-            
         } catch (error) {
             console.error('Conversion error:', error);
             alert(`Conversion failed: ${error.message}`);
