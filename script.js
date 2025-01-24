@@ -121,7 +121,7 @@ async function handleFileUpload(event, conversionType) {
             
             // Create and download JSON file
             const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
-                type: 'application/json' 
+                mimeType: 'application/json' 
             });
             } else if (conversionType === 'jsonToCsv') {
                 // JSON to CSV conversion
