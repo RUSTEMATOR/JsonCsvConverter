@@ -175,58 +175,75 @@ function csvToJson(csv) {
 //     reader.readAsText(file);
 // }
 
-async function handleFileUpload(event, conversionType) {
+let conversionType = ''; // Global variable to store the conversion type
+
+// Function to handle file upload (for both drag-and-drop and file input)
+async function handleFileUpload(event, type) {
     let file;
+
+    // Check if the event is from drag-and-drop or file input
     if (event.dataTransfer) {
-        // Handle drag-and-drop event
+        // Drag-and-drop event
         file = event.dataTransfer.files[0];
-    } else {
-        // Handle file input event
+    } else if (event.target) {
+        // File input event
         file = event.target.files[0];
+    } else {
+        console.error('No file found in the event.');
+        return;
     }
 
-    if (!file) {
-        throw new Error('No file selected or dropped.');
-    }
+    // Set the conversion type
+    conversionType = type;
 
     const reader = new FileReader();
 
     reader.onload = async function (e) {
         const fileContent = e.target.result;
-        let outputData, outputFileName, mimeType;
 
-        if (conversionType === 'csvToJson') {
-            // CSV to JSON conversion
-            const jsonData = csvToJson(fileContent);
-            outputData = JSON.stringify(jsonData, null, 2);
-            outputFileName = `${file.name.split('.')[0]}_converted.json`;
-            mimeType = 'application/json';
-        } else if (conversionType === 'jsonToCsv') {
-            // JSON to CSV conversion
-            const jsonData = JSON.parse(fileContent);
-            outputData = jsonToCsv(jsonData);
-            outputFileName = `${file.name.split('.')[0]}_converted.csv`;
-            mimeType = 'text/csv;charset=utf-8;';
-        } else {
-            throw new Error('Invalid conversion type');
+        try {
+            let outputData;
+            let outputFileName;
+            let mimeType;
+
+            if (conversionType === 'csvToJson') {
+                // CSV to JSON conversion
+                outputData = csvToJson(fileContent);
+                outputFileName = `${file.name.split('.')[0]}_converted.json`;
+                mimeType = 'application/json';
+                outputData = JSON.stringify(outputData, null, 2); // Format JSON for readability
+            } else if (conversionType === 'jsonToCsv') {
+                // JSON to CSV conversion
+                const jsonData = JSON.parse(fileContent);
+                outputData = jsonToCsv(jsonData);
+                outputFileName = `${file.name.split('.')[0]}_converted.csv`;
+                mimeType = 'text/csv;charset=utf-8;';
+            } else {
+                throw new Error('Invalid conversion type');
+            }
+
+            // Create and download file
+            const blob = new Blob([outputData], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = outputFileName;
+            link.click();
+
+            // Clean up memory
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Conversion error:', error);
+            alert(`Conversion failed: ${error.message}`);
         }
-
-        // Create and download the file
-        const blob = new Blob([outputData], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = outputFileName;
-        link.click();
-        URL.revokeObjectURL(url); // Clean up the URL object
     };
 
     reader.readAsText(file);
 }
 
+// Drag-and-Drop Event Handlers
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('file-input');
-let conversionType = '';
 
 // Handle Drag-and-Drop
 dropArea.addEventListener('dragover', (event) => {
@@ -241,7 +258,14 @@ dropArea.addEventListener('dragleave', () => {
 dropArea.addEventListener('drop', (event) => {
     event.preventDefault();
     dropArea.classList.remove('hover');
-    handleFileUpload(event, conversionType); // Pass the event object
+
+    // Prompt the user to select the conversion type
+    const type = prompt('Enter conversion type (csvToJson or jsonToCsv):');
+    if (type === 'csvToJson' || type === 'jsonToCsv') {
+        handleFileUpload(event, type);
+    } else {
+        alert('Invalid conversion type. Please enter "csvToJson" or "jsonToCsv".');
+    }
 });
 
 // Trigger File Input
