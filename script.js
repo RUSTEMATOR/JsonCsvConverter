@@ -53,7 +53,6 @@ function jsonToCsv(json) {
     return csvContent;
 }
 
-// Convert CSV to JSON (mimic the Python unflattening process)
 async function csvToJson(csv) {
     const rows = csv.split('\n').map(row => row.split(','));
 
