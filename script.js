@@ -103,35 +103,73 @@ function csvToJson(csv) {
     return result;
 }
 
+// async function handleFileUpload(event, conversionType) {
+//     const file = event.target.files[0];
+//     const reader = new FileReader();
+
+//     reader.onload = async function (e) {
+//         const fileContent = e.target.result;
+        
+//         if (conversionType === 'csvToJson') {
+//             const jsonData = csvToJson(fileContent);
+//             const outputFileName = `${file.name.split('.')[0]}_converted.json`;
+            
+//             // Create and download JSON file
+//             const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
+//                 type: 'application/json' 
+//             });
+//         } } else if (conversionType === 'jsonToCsv') {
+//                 // JSON to CSV conversion
+//                 const jsonData = JSON.parse(fileContent);
+//                 outputData = jsonToCsv(jsonData);
+//                 outputFileName = `${file.name.split('.')[0]}_converted.csv`;
+//                 mimeType = 'text/csv;charset=utf-8;';
+//             } else {
+//                 throw new Error('Invalid conversion type');
+//             }
+//             const url = URL.createObjectURL(blob);
+//             const link = document.createElement('a');
+//             link.href = url;
+//             link.download = outputFileName;
+//             link.click();
+//     };
+
+//     reader.readAsText(file);
+// }
+
+
 async function handleFileUpload(event, conversionType) {
     const file = event.target.files[0];
     const reader = new FileReader();
 
     reader.onload = async function (e) {
         const fileContent = e.target.result;
-        
+        let outputData, outputFileName, mimeType;
+
         if (conversionType === 'csvToJson') {
+            // CSV to JSON conversion
             const jsonData = csvToJson(fileContent);
-            const outputFileName = `${file.name.split('.')[0]}_converted.json`;
-            
-            // Create and download JSON file
-            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
-                type: 'application/json' 
-            });
-        } } else if (conversionType === 'jsonToCsv') {
-                // JSON to CSV conversion
-                const jsonData = JSON.parse(fileContent);
-                outputData = jsonToCsv(jsonData);
-                outputFileName = `${file.name.split('.')[0]}_converted.csv`;
-                mimeType = 'text/csv;charset=utf-8;';
-            } else {
-                throw new Error('Invalid conversion type');
-            }
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = outputFileName;
-            link.click();
+            outputData = JSON.stringify(jsonData, null, 2);
+            outputFileName = `${file.name.split('.')[0]}_converted.json`;
+            mimeType = 'application/json';
+        } else if (conversionType === 'jsonToCsv') {
+            // JSON to CSV conversion
+            const jsonData = JSON.parse(fileContent);
+            outputData = jsonToCsv(jsonData);
+            outputFileName = `${file.name.split('.')[0]}_converted.csv`;
+            mimeType = 'text/csv;charset=utf-8;';
+        } else {
+            throw new Error('Invalid conversion type');
+        }
+
+        // Create and download the file
+        const blob = new Blob([outputData], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = outputFileName;
+        link.click();
+        URL.revokeObjectURL(url); // Clean up the URL object
     };
 
     reader.readAsText(file);
