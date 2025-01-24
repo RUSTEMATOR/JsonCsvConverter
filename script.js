@@ -85,7 +85,6 @@ function csvToJson(csv) {
     for (let i = 1; i < lines.length; i++) {
         const currentLine = parseCsvRow(lines[i]);
         if (currentLine.length !== headers.length) continue;
-
         const key = currentLine[0];
         const value = currentLine[1].replace(/^"(.*)"$/, '$1'); // Remove surrounding quotes
         const keys = key.split('.');
@@ -110,41 +109,20 @@ async function handleFileUpload(event, conversionType) {
 
     reader.onload = async function (e) {
         const fileContent = e.target.result;
-
-        try {
-            let outputData;
-            let outputFileName;
-            let mimeType;
-
-            if (conversionType === 'csvToJson') {
-                // CSV to JSON conversion
-                outputData = await csvToJson(fileContent); // Await if csvToJson is async
-                outputFileName = `${file.name.split('.')[0]}_converted.json`;
-                mimeType = 'application/json';
-                outputData = JSON.stringify(outputData, null, 2); // Format JSON for readability
-            } else if (conversionType === 'jsonToCsv') {
-                // JSON to CSV conversion
-                const jsonData = JSON.parse(fileContent);
-                outputData = jsonToCsv(jsonData);
-                outputFileName = `${file.name.split('.')[0]}_converted.csv`;
-                mimeType = 'text/csv;charset=utf-8;';
-            } else {
-                throw new Error('Invalid conversion type');
-            }
-
-            // Create and download file
-            const blob = new Blob([outputData], { type: mimeType });
+        
+        if (conversionType === 'csvToJson') {
+            const jsonData = csvToJson(fileContent);
+            const outputFileName = `${file.name.split('.')[0]}_converted.json`;
+            
+            // Create and download JSON file
+            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
+                type: 'application/json' 
+            });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = outputFileName;
             link.click();
-
-            // Clean up memory
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Conversion error:', error);
-            alert(`Conversion failed: ${error.message}`);
         }
     };
 
