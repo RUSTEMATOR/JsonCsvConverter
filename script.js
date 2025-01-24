@@ -186,8 +186,15 @@ function detectFileType(content) {
     }
 }
 
+// Function to check if a file name matches the filter
+function matchesNameFilter(fileName, filter) {
+    if (!filter) return true; // No filter applied
+    const regex = new RegExp(filter.replace(/\./g, '\\.').replace(/\*/g, '.*'));
+    return regex.test(fileName);
+}
+
 // Function to handle file upload (for both drag-and-drop and file input)
-async function handleFileUpload(event) {
+async function handleFileUpload(event, nameFilter = '') {
     let file;
 
     // Check if the event is from drag-and-drop or file input
@@ -199,6 +206,12 @@ async function handleFileUpload(event) {
         file = event.target.files[0];
     } else {
         console.error('No file found in the event.');
+        return;
+    }
+
+    // Check if the file name matches the filter
+    if (!matchesNameFilter(file.name, nameFilter)) {
+        alert(`File "${file.name}" does not match the filter.`);
         return;
     }
 
@@ -269,9 +282,13 @@ dropArea.addEventListener('drop', (event) => {
 });
 
 // Trigger File Input
-function triggerFileInput() {
+function triggerFileInput(nameFilter = '') {
+    fileInput.setAttribute('data-filter', nameFilter); // Set the filter
     fileInput.click();
 }
 
 // Handle File Input Selection
-fileInput.addEventListener('change', (event) => handleFileUpload(event));
+fileInput.addEventListener('change', (event) => {
+    const nameFilter = event.target.getAttribute('data-filter') || '';
+    handleFileUpload(event, nameFilter);
+});
