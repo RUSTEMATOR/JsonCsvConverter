@@ -11,9 +11,8 @@ function flattenJson(data, parentKey = '', result = {}) {
     return result;
 }
 
-
 // Function to unflatten JSON (Nested structure from flattened keys)
-function unflattenJson(data) {
+async function unflattenJson(data) {
     const result = {};
     for (const flatKey in data) {
         const keys = flatKey.split('.');  // Split the key by dots
@@ -32,23 +31,30 @@ function unflattenJson(data) {
 // Function to convert flattened JSON to CSV (like Python pandas version)
 function jsonToCsv(json) {
     const flattened = flattenJson(json);
-    
+
     // Convert flattened JSON to an array of objects
     const rows = Object.entries(flattened).map(([key, value]) => ({
         Key: key,
         Value: value
     }));
 
-    // Convert rows into CSV format
+    // Escape commas and newlines in data by wrapping values in quotes
     const csvHeader = ['Key', 'Value'];
-    const csvRows = rows.map(row => `${row.Key},${row.Value}`);
+    const csvRows = rows.map(row => {
+        const value = row.Value;
+        // Wrap value in quotes if it contains commas or newlines
+        const escapedValue = (typeof value === 'string' && /[,\n]/.test(value))
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
+        return `${row.Key},${escapedValue}`;
+    });
+
     const csvContent = [csvHeader.join(',')].concat(csvRows).join('\n');
-    
     return csvContent;
 }
 
 // Convert CSV to JSON (mimic the Python unflattening process)
-function csvToJson(csv) {
+async function csvToJson(csv) {
     const rows = csv.split('\n').map(row => row.split(','));
 
     // Ensure there is data in the rows
@@ -70,7 +76,7 @@ function csvToJson(csv) {
     }, {});
 
     // Unflatten the CSV data into a nested structure
-    return unflattenJson(flatData);
+    return await unflattenJson(flatData);
 }
 
 // Process File Upload
@@ -103,3 +109,4 @@ function handleFileUpload(event, conversionType) {
 
     reader.readAsText(file);
 }
+
