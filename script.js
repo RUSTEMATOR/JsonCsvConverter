@@ -79,7 +79,6 @@ async function csvToJson(csv) {
     return result;
 }
 
-// Process File Upload
 async function handleFileUpload(event, conversionType) {
     const file = event.target.files[0];
     const reader = new FileReader();
