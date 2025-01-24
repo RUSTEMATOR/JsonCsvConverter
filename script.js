@@ -174,3 +174,34 @@ async function handleFileUpload(event, conversionType) {
 
     reader.readAsText(file);
 }
+
+
+// Drag-and-Drop Event Handlers
+const dropArea = document.getElementById('drop-area');
+const fileInput = document.getElementById('file-input');
+let conversionType = '';
+
+// Handle Drag-and-Drop
+dropArea.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    dropArea.classList.add('hover');
+});
+
+dropArea.addEventListener('dragleave', () => {
+    dropArea.classList.remove('hover');
+});
+
+dropArea.addEventListener('drop', (event) => {
+    event.preventDefault();
+    dropArea.classList.remove('hover');
+    handleFileUpload(event, conversionType);
+});
+
+// Trigger File Input
+function triggerFileInput(type) {
+    conversionType = type;
+    fileInput.click();
+}
+
+// Handle File Input Selection
+fileInput.addEventListener('change', (event) => handleFileUpload(event, conversionType));
