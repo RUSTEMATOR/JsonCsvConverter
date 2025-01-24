@@ -5,53 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON ↔ CSV Converter</title>
     <style>
+        /* General body styling */
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            font-family: 'Creepster', sans-serif; /* Google Font for goth style */
+            background-color: #181818; /* Dark background */
+            color: #f5f5f5; /* Light text color */
+            padding: 50px;
             text-align: center;
+            margin: 0;
         }
+
+        /* Title styling */
+        h1 {
+            font-size: 3rem;
+            color: #ff4d4d; /* Blood red color */
+            text-shadow: 2px 2px 10px #000; /* Spooky shadow */
+            margin-bottom: 20px;
+        }
+
+        /* Subtitle */
+        p {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        /* Drag-and-Drop area */
         #drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px;
-            width: 300px;
-            margin: auto;
+            border: 3px dashed #666;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            width: 320px;
             cursor: pointer;
+            background-color: #333;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.7); /* Red glow */
         }
+
         #drop-area.hover {
-            background-color: #f0f0f0;
+            background-color: #444; /* Darker when hovering */
         }
+
+        #drop-area h3 {
+            font-size: 1.5rem;
+            color: #ff6666; /* Soft red for text */
+        }
+
+        /* Hidden file input */
         .hidden {
             display: none;
         }
+
+        /* Button styles */
         .button {
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
+            margin: 15px;
+            padding: 15px 30px;
+            background-color: #222;
+            color: #ff4d4d;
+            border: 2px solid #ff4d4d;
+            border-radius: 50px;
+            font-size: 1.2rem;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
+
         .button:hover {
-            background-color: #0056b3;
+            background-color: #ff4d4d;
+            color: #fff;
+            transform: translateY(-5px); /* Lift the button on hover */
+        }
+
+        .button:active {
+            transform: translateY(2px); /* Push the button down when clicked */
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        /* Hover effect for drop area */
+        #drop-area:hover {
+            background-color: #555;
+        }
+
+        /* For that extra goth touch */
+        .goth-quote {
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #ff6666;
+            margin-top: 50px;
         }
     </style>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>JSON ↔ CSV Converter</h1>
-    <p>Drag and drop a file below or select one to convert:</p>
+    <h1>The Dark Converter</h1>
+    <p>Drag and drop your file here, or select it from your haunted folder...</p>
 
     <!-- Drag and Drop Area -->
     <div id="drop-area">
-        Drag & Drop File Here
+        <h3>Drag & Drop Your File Here</h3>
     </div>
+
     <input type="file" id="file-input" class="hidden" />
 
-    <!-- Buttons for Conversion -->
+    <!-- Conversion Buttons -->
     <button class="button" onclick="triggerFileInput('jsonToCsv')">Convert JSON to CSV</button>
     <button class="button" onclick="triggerFileInput('csvToJson')">Convert CSV to JSON</button>
+
+    <!-- Gothic Quote -->
+    <div class="goth-quote">
+        "When the moon is full, your files will transform..." 🌙
+    </div>
+
+    <div class="footer">
+        <p>Made with dark magic and a touch of caffeine. ⚡</p>
+    </div>
 
     <script src="script.js"></script>
     <script>
@@ -83,3 +156,4 @@
     </script>
 </body>
 </html>
+
