@@ -115,11 +115,14 @@ async function handleFileUpload(event, conversionType) {
         let mimeType;
 
         try {
-            if (conversionType === 'csvToJson') {
-                // CSV to JSON conversion
-                outputData = csvToJson(fileContent);
-                outputFileName = `${file.name.split('.')[0]}_converted.json`;
-                mimeType = 'application/json';
+             if (conversionType === 'csvToJson') {
+            const jsonData = csvToJson(fileContent);
+            const outputFileName = `${file.name.split('.')[0]}_converted.json`;
+            
+            // Create and download JSON file
+            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
+                type: 'application/json' 
+            });
             } else if (conversionType === 'jsonToCsv') {
                 // JSON to CSV conversion
                 const jsonData = JSON.parse(fileContent);
