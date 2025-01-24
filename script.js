@@ -118,12 +118,20 @@ async function handleFileUpload(event, conversionType) {
             const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
                 type: 'application/json' 
             });
+        } } else if (conversionType === 'jsonToCsv') {
+                // JSON to CSV conversion
+                const jsonData = JSON.parse(fileContent);
+                outputData = jsonToCsv(jsonData);
+                outputFileName = `${file.name.split('.')[0]}_converted.csv`;
+                mimeType = 'text/csv;charset=utf-8;';
+            } else {
+                throw new Error('Invalid conversion type');
+            }
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             link.download = outputFileName;
             link.click();
-        }
     };
 
     reader.readAsText(file);
