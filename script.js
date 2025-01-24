@@ -121,17 +121,20 @@ async function handleFileUpload(event, conversionType) {
             
             // Create and download JSON file
             const blob = new Blob([JSON.stringify(jsonData, null, 2)], { 
-                mimeType: 'application/json' 
+                type: 'application/json' 
             });
-            } else if (conversionType === 'jsonToCsv') {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = outputFileName;
+            link.click();
+        } else if (conversionType === 'jsonToCsv') {
                 // JSON to CSV conversion
                 const jsonData = JSON.parse(fileContent);
                 outputData = jsonToCsv(jsonData);
                 outputFileName = `${file.name.split('.')[0]}_converted.csv`;
                 mimeType = 'text/csv;charset=utf-8;';
-            }
-
-            // Create and download file
+                             // Create and download file
             const blob = new Blob([outputData], { type: mimeType });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -139,6 +142,9 @@ async function handleFileUpload(event, conversionType) {
             link.download = outputFileName;
             link.click();
             URL.revokeObjectURL(url);
+            }
+
+
             
         } catch (error) {
             console.error('Conversion error:', error);
