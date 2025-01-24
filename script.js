@@ -67,11 +67,14 @@ function handleFileUpload(event, conversionType) {
         const fileContent = e.target.result;
 
         let result;
+        let outputFileName;
         if (conversionType === 'jsonToCsv') {
             const jsonData = JSON.parse(fileContent);
             result = jsonToCsv(jsonData);
+            outputFileName = `${file.name.split('.')[0]}_converted.csv`;
         } else if (conversionType === 'csvToJson') {
             result = csvToJson(fileContent);
+            outputFileName = `${file.name.split('.')[0]}_converted.json`;
         }
 
         // Download the result
@@ -79,7 +82,7 @@ function handleFileUpload(event, conversionType) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = conversionType === 'jsonToCsv' ? 'output.csv' : 'output.json';
+        link.download = outputFileName;
         link.click();
     };
 
